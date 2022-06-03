@@ -6,10 +6,7 @@ import org.jscience.mathematics.vector.DenseVector;
 import org.jscience.mathematics.vector.Matrix;
 import org.jscience.mathematics.vector.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,8 +16,8 @@ import java.util.stream.Collectors;
 public class TwoGroupsModel {
     private static final boolean IS_MODEL_MODIFIED = true;
     private static final FloatingPoint GAUSS_MEAN = FloatingPoint.ZERO;
-    private static final FloatingPoint START_GAUSS_MEAN = FloatingPoint.valueOf(-1);
-    private static final FloatingPoint END_GAUSS_MEAN = FloatingPoint.valueOf(2);
+    private static final FloatingPoint START_GAUSS_MEAN = FloatingPoint.valueOf(-1000);
+    private static final FloatingPoint END_GAUSS_MEAN = FloatingPoint.valueOf(1000);
     private static final Integer NET_SIZE_GAUSS_MEAN = 5;
     private static final FloatingPoint GAUSS_VARIANCE = FloatingPoint.valueOf(10);
     private static final FloatingPoint START_BALANCE = FloatingPoint.ZERO;
@@ -28,8 +25,8 @@ public class TwoGroupsModel {
     private static final FloatingPoint END_T_VALUE = FloatingPoint.valueOf(1000);
     private static final List<FloatingPoint> A_COEFS = List.of(FloatingPoint.valueOf("0"), FloatingPoint.valueOf("0.5"));
     private static final Integer NET_SIZE = 20;
-    private static final FloatingPoint UNIFORMITY_BOUNDARY = FloatingPoint.valueOf(500);
-    private static final Integer NUMBER_OF_POINTS_AT_THE_ENDS = 1;
+    //    private static final FloatingPoint UNIFORMITY_BOUNDARY = FloatingPoint.valueOf(500);
+//    private static final Integer NUMBER_OF_POINTS_AT_THE_ENDS = 1;
     private int firstGroupPeopleAmount;
     private int secondGroupPeopleAmount;
     private int suggestionsAmount;
@@ -92,7 +89,7 @@ public class TwoGroupsModel {
 
     private TAndValueResult getTValueAndMaxSpk(Map<FloatingPoint, FloatingPoint> tValuesAndSPKsMap) {
         return tValuesAndSPKsMap.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
+                .max(Comparator.comparing(Map.Entry::getValue))
                 .map(TAndValueResult::new)
                 .orElseThrow();
     }
@@ -254,24 +251,20 @@ public class TwoGroupsModel {
 
     private List<FloatingPoint> generateNet(FloatingPoint startValue, FloatingPoint endValue, int netSize) {
         List<FloatingPoint> nodesList = new ArrayList<>();
-        int n = netSize - 2 * NUMBER_OF_POINTS_AT_THE_ENDS;
-        FloatingPoint standardStep = UNIFORMITY_BOUNDARY.times(2).divide(FloatingPoint.valueOf(n));
-        FloatingPoint expendedStepLeft = startValue.plus(UNIFORMITY_BOUNDARY).times(FloatingPoint.valueOf(-1)).divide(FloatingPoint.valueOf(NUMBER_OF_POINTS_AT_THE_ENDS));
-        FloatingPoint expendedStepRight = endValue.minus(UNIFORMITY_BOUNDARY).divide(FloatingPoint.valueOf(NUMBER_OF_POINTS_AT_THE_ENDS));
-        System.out.println("standardStep = " + standardStep + " expendedStepLeft = " + expendedStepLeft + " expendedStepRight = " + expendedStepRight);
+//        int n = netSize - 2 * NUMBER_OF_POINTS_AT_THE_ENDS;
+        int n = netSize;
+        FloatingPoint standardStep = (endValue.minus(startValue)).divide(FloatingPoint.valueOf(n));
+//        FloatingPoint expendedStepLeft = startValue.plus(UNIFORMITY_BOUNDARY).times(FloatingPoint.valueOf(-1)).divide(FloatingPoint.valueOf(NUMBER_OF_POINTS_AT_THE_ENDS));
+//        FloatingPoint expendedStepRight = endValue.minus(UNIFORMITY_BOUNDARY).divide(FloatingPoint.valueOf(NUMBER_OF_POINTS_AT_THE_ENDS));
+//        System.out.println("standardStep = " + standardStep + " expendedStepLeft = " + expendedStepLeft + " expendedStepRight = " + expendedStepRight);
         FloatingPoint lastValue = startValue;
         nodesList.add(lastValue);
-        for (int i = 0; i < netSize; i++) {
-            if (i < NUMBER_OF_POINTS_AT_THE_ENDS) {
-                lastValue = expendedStepLeft.plus(lastValue);
-            } else if (i > netSize - NUMBER_OF_POINTS_AT_THE_ENDS) {
-                lastValue = expendedStepRight.plus(lastValue);
-            } else {
-                lastValue = standardStep.plus(lastValue);
-            }
+        for (int i = 0; i < netSize - 1; i++) {
+            lastValue = lastValue.plus(standardStep);
             nodesList.add(lastValue);
         }
         nodesList.add(endValue);
+        System.out.println("NET SIZE = " + nodesList.size());
         return nodesList;
     }
 

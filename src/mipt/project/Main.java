@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 public class Main {
     private static final int FIRST_GROUP_PEOPLE_AMOUNT = 300;
     private static final int SECOND_GROUP_PEOPLE_AMOUNT = 300;
-    private static final int SUGGESTIONS_AMOUNT = 2000;
+    private static final int SUGGESTIONS_AMOUNT = 1000;
     private static final String FILE_STR_TEMPLATE = "%s,%s";
 
     public static void main(String[] args) {
-        FloatingPoint.setDigits(20);
+        FloatingPoint.setDigits(10);
         long startTime = System.currentTimeMillis();
         System.out.println("START");
         TwoGroupsModel twm = new TwoGroupsModel(
