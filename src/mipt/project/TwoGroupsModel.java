@@ -16,15 +16,15 @@ import java.util.stream.Collectors;
 public class TwoGroupsModel {
     private static final boolean IS_MODEL_MODIFIED = true;
     private static final FloatingPoint GAUSS_MEAN = FloatingPoint.ZERO;
-    private static final FloatingPoint START_GAUSS_MEAN = FloatingPoint.valueOf(-1000);
-    private static final FloatingPoint END_GAUSS_MEAN = FloatingPoint.valueOf(1000);
-    private static final Integer NET_SIZE_GAUSS_MEAN = 5;
+    private static final FloatingPoint START_GAUSS_MEAN = FloatingPoint.valueOf(-1);
+    private static final FloatingPoint END_GAUSS_MEAN = FloatingPoint.valueOf(1);
+    private static final Integer NET_SIZE_GAUSS_MEAN = 30;
     private static final FloatingPoint GAUSS_VARIANCE = FloatingPoint.valueOf(10);
     private static final FloatingPoint START_BALANCE = FloatingPoint.ZERO;
-    private static final FloatingPoint START_T_VALUE = FloatingPoint.valueOf(-1000);
-    private static final FloatingPoint END_T_VALUE = FloatingPoint.valueOf(1000);
-    private static final List<FloatingPoint> A_COEFS = List.of(FloatingPoint.valueOf("0"), FloatingPoint.valueOf("0.5"));
-    private static final Integer NET_SIZE = 20;
+    private static final FloatingPoint START_T_VALUE = FloatingPoint.valueOf(-400);
+    private static final FloatingPoint END_T_VALUE = FloatingPoint.valueOf(50);
+    private static final List<FloatingPoint> A_COEFS = List.of(FloatingPoint.valueOf("0"));
+    private static final Integer NET_SIZE = 50;
     //    private static final FloatingPoint UNIFORMITY_BOUNDARY = FloatingPoint.valueOf(500);
 //    private static final Integer NUMBER_OF_POINTS_AT_THE_ENDS = 1;
     private int firstGroupPeopleAmount;
@@ -72,11 +72,16 @@ public class TwoGroupsModel {
 
         List<MuModelResult> muModelResultList = new ArrayList<>();
         for (FloatingPoint gaussMean : gaussMeanNet) {
-            Map<FloatingPoint, TAndValueResult> aCoefAndTValueAndResultMap = calculate(gaussMean, A_COEFS).parallelStream()
+            List<ModelResult> modelResults = calculate(gaussMean, A_COEFS);
+            Map<FloatingPoint, TAndValueResult> aCoefAndTValueAndResultMap = modelResults.parallelStream()
                     .collect(Collectors.toMap(ModelResult::getaCoef, x -> getTValueAndMaxSpk(x.getAllGroupsResult())));
             for (Map.Entry<FloatingPoint, TAndValueResult> aCoefAndTValueAndResult : aCoefAndTValueAndResultMap.entrySet()) {
                 MuModelResult muModelResult = new MuModelResult(gaussMean);
                 muModelResult.setaCoef(aCoefAndTValueAndResult.getKey());
+                muModelResult.setModelResult(modelResults.stream()
+                        .filter(x -> x.getaCoef().equals(aCoefAndTValueAndResult.getKey()))
+                        .findFirst()
+                        .orElse(null));
 
                 TAndValueResult tAndValueResult = aCoefAndTValueAndResult.getValue();
                 muModelResult.settValue(tAndValueResult.gettValue());
@@ -95,6 +100,7 @@ public class TwoGroupsModel {
     }
 
     public List<ModelResult> calculate(FloatingPoint gaussMean, List<FloatingPoint> aCoefs) {
+        System.out.println("Now MU = " + gaussMean);
         List<ModelResult> mrs = null;
         System.out.println("GENERATE SUGGESTIONS MATRIX [START]");
         int peopleAmount = this.firstGroupPeopleAmount + this.secondGroupPeopleAmount;
@@ -130,6 +136,7 @@ public class TwoGroupsModel {
         List<ModelResult> mrs = new ArrayList<>();
         for (FloatingPoint aCoef : aCoefs) {
             ExecutorService executorService = Executors.newFixedThreadPool(20);
+//            ExecutorService executorService = Executors.newFixedThreadPool(1);
             ModelResult mr = new ModelResult();
             List<Future<OneDotResult>> oneDotResultsFuture = tNet.stream()
                     .map(tValue -> executorService.submit(() -> calcForOneDot(tValue, startBalances, suggestionsMatrix, aCoef)))
@@ -215,7 +222,7 @@ public class TwoGroupsModel {
 
     private FloatingPoint balanceFunction(FloatingPoint suggestion, FloatingPoint balance, FloatingPoint aCoef) {
         FloatingPoint ln = MathUtils.ln(balance);
-        FloatingPoint result = ln.times(aCoef).plus(FloatingPoint.ONE).times(suggestion);
+        FloatingPoint result = ln.times(aCoef).plus(FloatingPoint.valueOf(1)).times(suggestion);
         return result;
     }
 

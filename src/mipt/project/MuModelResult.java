@@ -7,6 +7,7 @@ public class MuModelResult {
     private FloatingPoint tValue;
     private FloatingPoint maxSpk;
     private FloatingPoint aCoef;
+    private ModelResult modelResult;
 
     public MuModelResult(FloatingPoint muValue) {
         this.muValue = muValue;
@@ -42,5 +43,13 @@ public class MuModelResult {
 
     public void setMaxSpk(FloatingPoint maxSpk) {
         this.maxSpk = maxSpk;
+    }
+
+    public ModelResult getModelResult() {
+        return modelResult;
+    }
+
+    public void setModelResult(ModelResult modelResult) {
+        this.modelResult = modelResult;
     }
 }

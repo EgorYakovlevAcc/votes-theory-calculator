@@ -33,6 +33,12 @@ public class Main {
             Map<FloatingPoint, FloatingPoint> resultsToFile = aCoefMuModelResults.getValue().stream()
                     .collect(Collectors.toMap(MuModelResult::getMuValue, MuModelResult::gettValue));
             writeResultToCsvFile(new TreeMap<>(resultsToFile), "MU-test-" + aCoefMuModelResults.getKey());
+            Map<FloatingPoint, ModelResult> map = aCoefMuModelResults.getValue().stream()
+                            .collect(Collectors.toMap(MuModelResult::getMuValue, MuModelResult::getModelResult));
+            for (Map.Entry<FloatingPoint, ModelResult> entry: map.entrySet()) {
+                writeResultToCsvFile(new TreeMap<>(entry.getValue().getFirstGroupResult()), "test-first" + entry.getKey() + "-" + aCoefMuModelResults.getKey());
+                writeResultToCsvFile(new TreeMap<>(entry.getValue().getSecondGroupResult()), "test-second" + entry.getKey() + "-" + aCoefMuModelResults.getKey());
+            }
         }
 
 //        List<ModelResult> modelResults = twm.calculate();
@@ -48,7 +54,7 @@ public class Main {
 //        }
         System.out.println("FINISH");
         long finishTime = System.currentTimeMillis();
-        System.out.println("YOU SPEND = " + (finishTime - startTime));
+        System.out.println("YOU SPEND = " + (finishTime - startTime) + " ms");
 //    }
 
 //    private static Double getTForMaxSumOfGroups(ModelResult modelResult) {
