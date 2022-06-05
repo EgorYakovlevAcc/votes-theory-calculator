@@ -21,9 +21,9 @@ public class TwoGroupsModel {
     private static final Integer NET_SIZE_GAUSS_MEAN = 30;
     private static final FloatingPoint GAUSS_VARIANCE = FloatingPoint.valueOf(10);
     private static final FloatingPoint START_BALANCE = FloatingPoint.ZERO;
-    private static final FloatingPoint START_T_VALUE = FloatingPoint.valueOf(-400);
-    private static final FloatingPoint END_T_VALUE = FloatingPoint.valueOf(50);
-    private static final List<FloatingPoint> A_COEFS = List.of(FloatingPoint.valueOf("0"));
+    private static final FloatingPoint START_T_VALUE = FloatingPoint.valueOf(-50);
+    private static final FloatingPoint END_T_VALUE = FloatingPoint.valueOf(400);
+    private static final List<FloatingPoint> A_COEFS = List.of(FloatingPoint.valueOf("0.1"));
     private static final Integer NET_SIZE = 50;
     //    private static final FloatingPoint UNIFORMITY_BOUNDARY = FloatingPoint.valueOf(500);
 //    private static final Integer NUMBER_OF_POINTS_AT_THE_ENDS = 1;
@@ -198,7 +198,7 @@ public class TwoGroupsModel {
         Vector<FloatingPoint> suggestions = getSuggestions(inputSuggestions, balances, aCoef, IS_MODEL_MODIFIED);
         DenseVector<FloatingPoint> firstGroupSuggestions = getSuggestionsVector(suggestions, 0, this.firstGroupPeopleAmount);
         DenseVector<FloatingPoint> secondGroupSuggestions = getSuggestionsVector(suggestions, this.firstGroupPeopleAmount, this.firstGroupPeopleAmount + this.secondGroupPeopleAmount);
-        if (isSuggestionApplyed(firstGroupSuggestions, tValue) && isSuggestionApplyed(secondGroupSuggestions, tValue)) {
+        if (isSuggestionApplyed(firstGroupSuggestions, tValue) || isSuggestionApplyed(secondGroupSuggestions, tValue)) {
             return suggestions;
         }
         return DenseVector.valueOf(getZeroPeopleBalancesList(suggestions.getDimension()));
